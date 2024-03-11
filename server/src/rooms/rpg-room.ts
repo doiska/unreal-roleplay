@@ -18,15 +18,22 @@ export class RpgRoom extends Room<RPGRoomState> {
             this.state.messages.push(new Message({
                 user: player.name,
                 content: message,
-                timestamp: Date.now()
+                createdAt: Date.now()
             }));
 
             console.log("Sent message:", message);
         });
 
-        this.onMessage<{ command: string, content: string }>(
+        this.onMessage<string>(
             "command",
-            (client, command) => {
+            (client, message) => {
+                const args = message.split(" ");
+
+                const command = {
+                    command: args[0].slice(1),
+                    content: args.slice(1).join(" ")
+                };
+
                 const CommandClass = commands.get(command.command);
 
                 if (CommandClass) {

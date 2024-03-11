@@ -11,6 +11,7 @@ interface Track {
     };
     state: {
         playing: boolean;
+        volume: number;
     };
     element: HTMLAudioElement;
 }
@@ -23,6 +24,7 @@ interface MusicPlayerState {
     playTrack: (trackId: string) => void;
     pauseTrack: (trackId: string) => void;
     removeTrack: (trackId: string) => void;
+    setVolume: (trackId: string, volume: number) => void;
     clearTracks: () => void;
 }
 
@@ -53,7 +55,7 @@ export const useMusicPlayer = create<MusicPlayerState>()((set, get) => ({
                     ...state.tracks,
                     {
                         info: track,
-                        state: { playing: false },
+                        state: { playing: false, volume: 100 },
                         element: audioElement
                     }
                 ]
@@ -112,6 +114,25 @@ export const useMusicPlayer = create<MusicPlayerState>()((set, get) => ({
             }
 
             return { tracks: [] };
+        });
+    },
+    setVolume: (trackId: string, volume: number) => {
+        set(state => {
+            return {
+                tracks: state.tracks.map(track => {
+                    if (track.info.id !== trackId) {
+                        return track;
+                    }
+
+                    const { element } = track;
+                    element.volume = volume / 100;
+
+                    return {
+                        ...track,
+                        state: { ...track.state, volume }
+                    }
+                })
+            }
         });
     }
 }));

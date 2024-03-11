@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { Client, type Room } from "colyseus.js";
+import { RoomAvailable, Client, type Room } from "colyseus.js";
 import { Schema } from "@colyseus/schema";
 import { RPGRoomState } from "../../../server/src/rooms/schema/rpg-room-state.ts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function setupColyseus<S extends Schema>(ws: string) {
     let isConnecting = false;
@@ -14,17 +14,6 @@ function setupColyseus<S extends Schema>(ws: string) {
     }>(() => ({ room: undefined }));
 
     const useColyseusState = create<S>()(() => ({} as S));
-
-    const useOnBroadcast = (event: string, callback: (message: any) => void) => {
-        const room = useRoom.getState().room;
-
-        useEffect(() => {
-            if (room) {
-                console.log("Listening to broadcast", event)
-                room.onMessage(event, callback);
-            }
-        }, [room, event, callback]);
-    }
 
     const listenToRoom = (room: Room<S>) => {
         useRoom.setState({ room });
@@ -82,6 +71,21 @@ function setupColyseus<S extends Schema>(ws: string) {
         }
     }
 
+    const useAvailableRooms = () => {
+        const [rooms, setRooms] = useState<RoomAvailable[]>([]);
+
+        useEffect(() => {
+            const interval = setInterval(async () => {
+                const availableRooms = await client.getAvailableRooms();
+                setRooms(availableRooms);
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }, []);
+
+        return rooms;
+    }
+
     return {
         client,
         rooms: {
@@ -90,9 +94,9 @@ function setupColyseus<S extends Schema>(ws: string) {
             joinOrCreate: joinOrCreateRoom,
             leave: leaveRoom,
         },
+        useAvailableRooms,
         useColyseusRoom: useRoom,
         useColyseusState,
-        useOnBroadcast
     }
 }
 
@@ -100,5 +104,5 @@ export const {
     rooms,
     useColyseusState,
     useColyseusRoom,
-    useOnBroadcast
+    useAvailableRooms
 } = setupColyseus<RPGRoomState>("ws://localhost:2567")

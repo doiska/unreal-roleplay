@@ -10,8 +10,8 @@ class Attachment extends Schema {
 export class Message extends Schema {
     @type("string") user: string;
     @type("string") content: string;
-    @type("number") timestamp: number;
-    @type("string") type: 'message' | 'song' | 'dice' | 'image' | 'video' | 'file' | 'map' | 'character' | 'npc' | 'monster' | 'item' | 'spell' | 'ability' | 'class';
+    @type("string") type: 'message' | 'song' | 'dice' | 'image';
+    @type("number") createdAt: number = Date.now();
     @type([Attachment]) attachment?: ArraySchema<Attachment>;
 }
 
@@ -25,6 +25,7 @@ export class Song extends Schema {
 export class RPGRoomState extends Schema {
     @type("string")
     name: string = "Unnamed Room";
+
     @type("number")
     maxPlayers: number = 8;
 

@@ -1,4 +1,4 @@
-import { useColyseusState } from "../colyseus";
+import { useColyseusState } from "@/colyseus";
 import { useEffect } from "react";
 import { useMusicPlayer } from "./music-player.ts";
 
@@ -7,6 +7,8 @@ export function useRoomAudio() {
     const playerQueue = useMusicPlayer();
 
     useEffect(() => {
+        console.log(syncQueue)
+
         if (!syncQueue) {
             playerQueue.clearTracks();
             return;

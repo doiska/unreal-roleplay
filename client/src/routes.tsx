@@ -1,13 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
+import { Rooms } from "@/pages/rooms/rooms.tsx";
+import { Room } from "@/pages/rooms/rooms.[id].tsx";
+import { Layout } from "@/pages/_layout.tsx";
 
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
     {
-        path: "/",
-        element: <>Join a room.</>
+        element: <Layout />,
+        children: [
+            { path: "/", element: <Rooms /> },
+            { path: "/room/:id", element: <Room /> }
+        ]
     },
-    {
-        path: "/rooms/:room",
-        element: <>Join room</>
-    }
 ])
 
