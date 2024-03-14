@@ -8,6 +8,7 @@ class Attachment extends Schema {
 }
 
 export class Message extends Schema {
+    @type("string") id = Math.random().toString(36).substring(2, 9);
     @type("string") user: string;
     @type("string") content: string;
     @type("string") type: 'message' | 'song' | 'dice' | 'image';

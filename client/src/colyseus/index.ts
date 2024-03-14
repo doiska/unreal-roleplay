@@ -27,6 +27,11 @@ function setupColyseus<S extends Schema>(ws: string) {
             const newState = state.clone();
             useColyseusState.setState(newState);
         });
+
+        room.onLeave(() => {
+            useRoom.setState({ room: undefined });
+            useColyseusState.setState({} as S);
+        });
     }
 
     const joinOrCreateRoom = async (roomName: string, options?: {}) => {

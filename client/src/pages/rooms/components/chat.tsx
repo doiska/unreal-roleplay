@@ -1,9 +1,11 @@
 import { useColyseusRoom, useColyseusState } from "@/colyseus";
-import { Input } from "@/components/ui/input.tsx";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
-import { type FormEvent } from "react";
+import { type FormEvent, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { UploadCloud } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { InputCommand } from "@/pages/rooms/components/input.tsx";
+import { TooltipProvider } from "@/components/plate-ui/tooltip.tsx";
 
 const formatDate = (date: number) => {
     return new Intl.DateTimeFormat("pt-BR", {
@@ -16,32 +18,44 @@ export function Chat() {
     const messages = useColyseusState(state => state.messages)
     const room = useColyseusRoom(state => state.room)
 
+    const formRef = useRef<HTMLFormElement>(null)
+    const scrollRef = useRef<HTMLDivElement>(null)
+
     const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        if(!room) {
+        console.log("Sending message")
+
+        if (!room) {
             return console.error("Room not found")
         }
 
         const formData = new FormData(e.currentTarget)
         const message = (formData.get("message") as string).trim();
 
-        if(message.startsWith("/")) {
+        if (message.startsWith("/")) {
             room.send("command", message)
         } else {
             room.send("message", message)
         }
 
-        e.currentTarget.reset();
     }
 
+    useEffect(() => {
+        if (scrollRef.current) {
+            if (scrollRef.current.getBoundingClientRect().top < window.innerHeight) {
+                scrollRef.current.scrollIntoView({ behavior: "smooth" })
+            }
+        }
+    }, [messages])
+
     return (
-        <div className="flex flex-col gap-2 w-full h-full py-12">
-            <div className="container flex flex-col gap-2 flex-1">
-                <div className="flex flex-col flex-1 gap-2">
-                    {messages.map(message => (
+        <div className="flex flex-col gap-2 w-full h-full py-8 px-4">
+            <ScrollArea className="md:max-h-[900px] h-full">
+                {messages.map(message => (
+                    <>
                         <div
-                            key={message.content}
+                            key={message.id}
                             className="flex gap-2 hover:bg-secondary/10 p-2 rounded-md transition-all"
                         >
                             <Avatar>
@@ -55,15 +69,18 @@ export function Chat() {
                                 <p>{message.content}</p>
                             </div>
                         </div>
-                    ))}
-                </div>
-                <form onSubmit={handleSendMessage} className="flex gap-2">
-                    <Input name="message" placeholder="Digite sua mensagem" />
-                    <Button variant="default" size="icon">
-                        <UploadCloud />
-                    </Button>
-                </form>
-            </div>
+                        <div ref={scrollRef}></div>
+                    </>
+                ))}
+            </ScrollArea>
+            <form ref={formRef} onSubmit={handleSendMessage} className="flex gap-2">
+                <TooltipProvider>
+                <InputCommand />
+                <Button variant="default" size="icon">
+                    <UploadCloud />
+                </Button>
+                </TooltipProvider>
+            </form>
         </div>
     )
 }

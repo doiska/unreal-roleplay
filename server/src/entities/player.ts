@@ -1,14 +1,21 @@
 import { Schema, type } from "@colyseus/schema";
 
-export class Player extends Schema {
+interface IPlayer {
+    name: string;
+    role: "user" | "master";
+}
+
+export class Player extends Schema implements IPlayer {
     @type("string")
     public name: string = "Unnamed Player"
 
-    constructor(
-        { name }: { name: string }
-    ) {
+    @type("string")
+    public role: "user" | "master" = "user"
+
+    constructor(player: IPlayer) {
         super();
 
-        this.name = name;
+        this.name = player.name;
+        this.role = player.role;
     }
 }

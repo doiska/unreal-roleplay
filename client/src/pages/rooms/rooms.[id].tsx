@@ -1,45 +1,12 @@
-import { useColyseusRoom } from "@/colyseus";
-import { Navigate } from "react-router-dom";
+import { useColyseusRoom, useColyseusState } from "@/colyseus";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button.tsx";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import { Chat } from "@/pages/rooms/components/chat.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Heart, Rabbit, Shell, Shield, Sparkle, Users2 } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { SongList } from "@/pages/rooms/components/song-list.tsx";
-
-const players = [
-    {
-        id: 1,
-        name: "Player 1",
-        avatar: "https://randomuser.me/api/portraits/lego/5.jpg",
-    },
-    {
-        id: 2,
-        name: "Player 2",
-        avatar: "https://randomuser.me/api/portraits/lego/6.jpg",
-    },
-    {
-        id: 3,
-        name: "Player 3",
-        avatar: "https://randomuser.me/api/portraits/lego/7.jpg",
-    },
-    {
-        id: 4,
-        name: "Player 4",
-        avatar: "https://randomuser.me/api/portraits/lego/8.jpg",
-    },
-    {
-        id: 5,
-        name: "Player 5",
-        avatar: "https://randomuser.me/api/portraits/lego/9.jpg",
-    },
-    {
-        id: 6,
-        name: "Player 6",
-        avatar: "https://randomuser.me/api/portraits/lego/1.jpg",
-    }
-]
 
 const characterStats = [
     {
@@ -82,10 +49,19 @@ const characterStats = [
 ]
 
 export function Room() {
+    const navigate = useNavigate();
     const room = useColyseusRoom(state => state.room)
+    const playersMap = useColyseusState(state => state.players);
 
     if (!room) {
         return <Navigate to="/" />
+    }
+
+    const players = [...playersMap.entries()].map(([id, player]) => ({ id, ...player }));
+
+    const handleLeave = async () => {
+        await room.leave();
+        navigate("/");
     }
 
     return (
@@ -98,7 +74,7 @@ export function Room() {
                     {players.map(player => (
                         <Button variant="outline" key={player.id} className="flex gap-2 justify-start px-2 h-12 ">
                             <Avatar className="w-8 h-8">
-                                <AvatarImage src={player.avatar} alt={player.name} />
+                                {/*<AvatarImage src={player.avatar} alt={player.name} />*/}
                                 <AvatarFallback>{player.name[0]}</AvatarFallback>
                             </Avatar>
                             <span>{player.name}</span>
@@ -108,7 +84,7 @@ export function Room() {
 
                 <Button
                     className="w-full mt-8"
-                    onClick={() => room.leave()}
+                    onClick={handleLeave}
                 >
                     Sair da sala
                 </Button>
@@ -132,7 +108,11 @@ export function Room() {
 
                 <Card className="flex flex-col gap-2 p-4">
                     {characterStats.map(stat => (
-                        <Badge key={stat.id} variant="secondary-gradient" className="p-1 flex justify-between text-sm pl-2">
+                        <Badge
+                            key={stat.id}
+                            variant="secondary-gradient"
+                            className="p-1 flex justify-between text-sm pl-2"
+                        >
                             <div className="flex gap-2 items-center">
                                 <stat.icon size={16} className="text-primary" />
                                 <span>{stat.name}</span>

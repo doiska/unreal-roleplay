@@ -1,12 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { rooms, useColyseusRoom } from "@/colyseus";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp"
 import { FormEvent } from "react";
 import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input.tsx";
 
 export function Rooms() {
 
@@ -42,27 +41,7 @@ export function Rooms() {
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
                 <form onSubmit={handleJoinRoom} className="flex flex-col gap-4">
-                    <InputOTP
-                        maxLength={6}
-                        name="room-id"
-                        className="uppercase"
-                        pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
-                        render={({ slots }) => (
-                            <>
-                                <InputOTPGroup>
-                                    {slots.slice(0, 3).map((slot, index) => (
-                                        <InputOTPSlot key={index} {...slot} />
-                                    ))}
-                                </InputOTPGroup>
-                                <InputOTPSeparator />
-                                <InputOTPGroup>
-                                    {slots.slice(3).map((slot, index) => (
-                                        <InputOTPSlot key={index} {...slot} />
-                                    ))}
-                                </InputOTPGroup>
-                            </>
-                        )}
-                    />
+                    <Input name="room-id" />
                     <Button className="w-full">
                         Entrar
                     </Button>

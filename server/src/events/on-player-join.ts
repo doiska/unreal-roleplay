@@ -4,8 +4,13 @@ import { Player } from "../entities/player";
 
 export class OnPlayerJoin extends Command<RPGRoom, { sessionId: string }> {
     execute({ sessionId } = this.payload) {
-        console.log(sessionId, "joined!");
-
-        this.state.players.set(sessionId, new Player({ name: `Player ${this.state.players.size + 1}` }));
+        this.state.players.set(sessionId, new Player({ name: "Unnamed Player", role: "user" }));
     }
 }
+
+export class OnPlayerLeave extends Command<RPGRoom, { sessionId: string }> {
+    execute({ sessionId } = this.payload) {
+        this.state.players.delete(sessionId);
+    }
+}
+

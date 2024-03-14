@@ -23,6 +23,8 @@ export class RollDiceCommand extends Command<RPGRoom, { sessionId: string; comma
         const result = tryParsingDice(content);
         const player = this.state.players.get(sessionId);
 
+        console.log(`RollDiceCommand: ${command} ${unsafeContent} => ${content} => ${result}`)
+
         if(!player || !result) {
             return;
         }
