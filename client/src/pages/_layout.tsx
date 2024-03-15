@@ -5,7 +5,7 @@ export function Layout() {
     useRoomAudio();
 
     return (
-        <main className="min-h-screen">
+        <main className="min-h-screen w-screen overflow-hidden">
             <Outlet />
         </main>
     )

@@ -48,7 +48,7 @@ export function Chat() {
     }, [messages])
 
     return (
-        <div className="flex flex-col w-full h-full px-4 gap-2">
+        <div className="flex flex-col w-full h-full p-4 gap-2">
             <GameMap />
             <ScrollArea className="md:max-h-[400px] min-h-48 border rounded">
                 {messages.map(message => (

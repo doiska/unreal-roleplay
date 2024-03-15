@@ -2,7 +2,7 @@ import { Room, Client } from "@colyseus/core";
 import { Message, RPGRoomState } from "./schema/rpg-room-state";
 import { tryParsingDice } from "../lib/dices";
 import { Dispatcher } from "@colyseus/command";
-import { OnPlayerJoin, OnPlayerLeave } from "../events/on-player-join";
+import { OnPlayerJoin, OnPlayerLeave, OnPlayerMove } from "../events/on-player-join";
 import { commands } from "../commands";
 
 export class RpgRoom extends Room<RPGRoomState> {
@@ -39,7 +39,11 @@ export class RpgRoom extends Room<RPGRoomState> {
                 const CommandClass = commands.get(command.command);
 
                 if (CommandClass) {
-                    this.dispatcher.dispatch(new CommandClass(), { sessionId: client.sessionId, command: command.command, content: command.content });
+                    this.dispatcher.dispatch(new CommandClass(), {
+                        sessionId: client.sessionId,
+                        command: command.command,
+                        content: command.content
+                    });
                 }
             }
         );
@@ -48,6 +52,14 @@ export class RpgRoom extends Room<RPGRoomState> {
     onJoin(client: Client, options: any) {
         console.log(client.sessionId, "joined!");
         this.dispatcher.dispatch(new OnPlayerJoin(), { sessionId: client.sessionId });
+
+        this.onMessage<{
+            id: string;
+            x: number;
+            y: number;
+        }>("move", (client, payload) => {
+            this.dispatcher.dispatch(new OnPlayerMove(), { id: payload.id, x: payload.x, y: payload.y });
+        });
     }
 
     onLeave(client: Client, consented: boolean) {

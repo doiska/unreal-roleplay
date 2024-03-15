@@ -14,3 +14,16 @@ export class OnPlayerLeave extends Command<RPGRoom, { sessionId: string }> {
     }
 }
 
+export class OnPlayerMove extends Command<RPGRoom, { id: string, x: number, y: number }> {
+    execute({ id, x, y } = this.payload) {
+        const player = this.state.players.get(id);
+
+        if (player) {
+            player.position.x = x;
+            player.position.y = y;
+        }
+
+        console.log("Player moved", id, x, y);
+    }
+}
+
