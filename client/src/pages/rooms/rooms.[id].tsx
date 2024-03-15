@@ -65,7 +65,7 @@ export function Room() {
     }
 
     return (
-        <div className="relative flex h-full w-full">
+        <div className="relative flex h-full min-w-full">
             <div className="flex flex-col bg-secondary/60 text-white p-4 min-w-72">
                 <h1 className="text-2xl font-black">UNREAL ROLEPLAY</h1>
                 <h2 className="font-bold">Kimetsu No Yaiba</h2>
@@ -90,9 +90,7 @@ export function Room() {
                 </Button>
             </div>
 
-            <div className="flex-1">
-                <Chat />
-            </div>
+            <Chat />
 
             <div className="flex flex-col bg-secondary/60 text-white p-4 min-w-72 space-y-2">
                 <Card className="text-2xl font-black p-2 text-center">

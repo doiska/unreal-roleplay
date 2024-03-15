@@ -5,7 +5,7 @@ export function Layout() {
     useRoomAudio();
 
     return (
-        <main className="h-screen flex justify-center items-center bg-background">
+        <main className="min-h-screen">
             <Outlet />
         </main>
     )

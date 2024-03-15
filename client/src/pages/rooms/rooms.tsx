@@ -30,31 +30,33 @@ export function Rooms() {
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-black">
-                    ROOMS
-                </CardTitle>
-                <CardDescription>
-                    Crie ou entre em uma sala para jogar
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-                <form onSubmit={handleJoinRoom} className="flex flex-col gap-4">
-                    <Input name="room-id" />
-                    <Button className="w-full">
-                        Entrar
+        <div className="flex flex-col h-full w-full items-center justify-center gap-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-black">
+                        ROOMS
+                    </CardTitle>
+                    <CardDescription>
+                        Crie ou entre em uma sala para jogar
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                    <form onSubmit={handleJoinRoom} className="flex flex-col gap-4">
+                        <Input name="room-id" />
+                        <Button className="w-full">
+                            Entrar
+                        </Button>
+                    </form>
+                    <Separator />
+                    <Button
+                        className="w-full"
+                        variant="outline"
+                        onClick={handleCreateRoom}
+                    >
+                        Criar sala
                     </Button>
-                </form>
-                <Separator />
-                <Button
-                    className="w-full"
-                    variant="outline"
-                    onClick={handleCreateRoom}
-                >
-                    Criar sala
-                </Button>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
+        </div>
     )
 }

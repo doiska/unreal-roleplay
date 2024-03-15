@@ -1,11 +1,9 @@
 import { useColyseusRoom, useColyseusState } from "@/colyseus";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import { type FormEvent, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button.tsx";
-import { UploadCloud } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InputCommand } from "@/pages/rooms/components/input.tsx";
-import { TooltipProvider } from "@/components/plate-ui/tooltip.tsx";
+import { GameMap } from "@/components/game/map.tsx";
 
 const formatDate = (date: number) => {
     return new Intl.DateTimeFormat("pt-BR", {
@@ -50,8 +48,9 @@ export function Chat() {
     }, [messages])
 
     return (
-        <div className="flex flex-col gap-2 w-full h-full py-8 px-4">
-            <ScrollArea className="md:max-h-[900px] h-full">
+        <div className="flex flex-col w-full h-full px-4 gap-2">
+            <GameMap />
+            <ScrollArea className="md:max-h-[400px] min-h-48 border rounded">
                 {messages.map(message => (
                     <>
                         <div
@@ -73,13 +72,8 @@ export function Chat() {
                     </>
                 ))}
             </ScrollArea>
-            <form ref={formRef} onSubmit={handleSendMessage} className="flex gap-2">
-                <TooltipProvider>
+            <form ref={formRef} onSubmit={handleSendMessage} className="flex gap-2 justify-stretch">
                 <InputCommand />
-                <Button variant="default" size="icon">
-                    <UploadCloud />
-                </Button>
-                </TooltipProvider>
             </form>
         </div>
     )
