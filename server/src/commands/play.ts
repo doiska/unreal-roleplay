@@ -8,7 +8,13 @@ export class PlaySongCommand extends Command<RPGRoom, { sessionId: string; comma
 
         const message = new Message({
             user: player.name,
-            content: `Playing song: ${unsafeContent}`,
+            content: JSON.stringify({
+                "type": "doc",
+                "content": [{
+                    "type": "paragraph",
+                    "content": [{ "type": "text", "text": `Playing song: ${unsafeContent}`}]
+                }]
+            }),
             type: "song"
         });
 

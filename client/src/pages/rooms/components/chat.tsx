@@ -34,7 +34,7 @@ export function Chat() {
   const messages = useColyseusState(state => state.messages);
   const room = useColyseusRoom(state => state.room);
 
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = (message: string, type: "message" | "command" = "message") => {
     if (!room) {
       return console.error("Room not found");
     }
@@ -43,7 +43,7 @@ export function Chat() {
       return console.error("Message is empty");
     }
 
-    if (message.startsWith("/")) {
+    if (type === "command") {
       room.send(
           "command",
           message

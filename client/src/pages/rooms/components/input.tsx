@@ -72,7 +72,7 @@ export const extensions = [
 ];
 
 export const RichTextEditor = ({ handleSubmit }: {
-  handleSubmit: (text: string) => void
+  handleSubmit: (text: string, type: "command" | "message") => void
 }) => {
   const editor = useEditor({
     editorProps: {
@@ -84,7 +84,14 @@ export const RichTextEditor = ({ handleSubmit }: {
       ...extensions,
       KeyboardHandler.configure({
         onKeyPressed: (editor: Editor) => {
-          handleSubmit(JSON.stringify(editor.getJSON()));
+          const firstCommand = editor.getText();
+          const isCommand = firstCommand?.trim().startsWith("/");
+
+          if(isCommand) {
+            handleSubmit(firstCommand, "command");
+          } else {
+            handleSubmit(JSON.stringify(editor.getJSON()), "message");
+          }
         }
       }),
     ],

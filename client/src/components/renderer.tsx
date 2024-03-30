@@ -27,6 +27,7 @@ const handleMark = (
     case "link":
       const { href, target } = mark.attrs;
       return <a
+          key={node.id}
           className="graf markup--anchor markup--anchor-readOnly"
           target={target}
           rel="noopener noreferrer nofollow"
@@ -46,16 +47,16 @@ function convertNodeToElement(node: JSONContent) {
     case "heading": {
       switch (node.attrs?.level) {
         case 1:
-          return <h1>{traverseNodes(node.content)}</h1>;
+          return <h1 key={node.id}>{traverseNodes(node.content)}</h1>;
         case 2:
-          return <h2>{traverseNodes(node.content)}</h2>;
+          return <h2 key={node.id}>{traverseNodes(node.content)}</h2>;
         case 3:
-          return <h3>{traverseNodes(node.content)}</h3>;
+          return <h3 key={node.id}>{traverseNodes(node.content)}</h3>;
       }
       break;
     }
     case "blockquote":
-      return <blockquote>{traverseNodes(node.content)}</blockquote>;
+      return <blockquote key={node.id}>{traverseNodes(node.content)}</blockquote>;
     case "paragraph": {
       return (<p key={node.id}>
         {traverseNodes(node.content)}
@@ -83,7 +84,10 @@ function convertNodeToElement(node: JSONContent) {
     }
     case "custom-image": {
       console.log(node);
-      return <ViewImage {...node.attrs} />
+      return <ViewImage key={node.id} {...node.attrs} />
+    }
+    case "hardBreak": {
+      return <br key={node.id} />;
     }
     default: {
       console.error(
