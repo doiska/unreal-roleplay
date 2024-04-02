@@ -23,9 +23,9 @@ function applyRules(content: string) {
 export class RollDiceCommand extends Command<RPGRoom, {
   sessionId: string;
   command: string,
-  content: string
+  content: string[]
 }> {
-  execute({ command, content: unsafeContent, sessionId } = this.payload) {
+  execute({ command, content: [unsafeContent], sessionId } = this.payload) {
     const content = applyRules(unsafeContent);
     const result = tryParsingDice(content);
     const player = this.state.players.get(sessionId);

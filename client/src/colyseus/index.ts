@@ -1,10 +1,9 @@
 import { create } from "zustand";
 import { RoomAvailable, Client, type Room } from "colyseus.js";
-import { Schema } from "@colyseus/schema";
 import { RPGRoomState } from "../../../server/src/rooms/schema/rpg-room-state.ts";
 import { useEffect, useState } from "react";
 
-function setupColyseus<S extends Schema>(ws: string) {
+function setupColyseus<S extends RPGRoomState>(ws: string) {
     let isConnecting = false;
 
     const client = new Client(ws);
@@ -14,6 +13,16 @@ function setupColyseus<S extends Schema>(ws: string) {
     }>(() => ({ room: undefined }));
 
     const useColyseusState = create<S>()(() => ({} as S));
+
+    const useMyState = () => {
+        const sessionId = useRoom(state => state.room?.sessionId);
+
+        if (typeof sessionId === "string") {
+            return useColyseusState(curr => curr.players.get(sessionId) || null);
+        }
+
+        return null;
+    }
 
     const listenToRoom = (room: Room<S>) => {
         useRoom.setState({ room });
@@ -100,6 +109,7 @@ function setupColyseus<S extends Schema>(ws: string) {
             leave: leaveRoom,
         },
         useAvailableRooms,
+        useMyState,
         useColyseusRoom: useRoom,
         useColyseusState,
     }
@@ -109,5 +119,6 @@ export const {
     rooms,
     useColyseusState,
     useColyseusRoom,
+    useMyState,
     useAvailableRooms
 } = setupColyseus<RPGRoomState>("ws://localhost:2567")

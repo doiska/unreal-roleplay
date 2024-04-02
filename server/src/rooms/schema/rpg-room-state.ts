@@ -1,6 +1,7 @@
 import { Schema, MapSchema, ArraySchema, type } from "@colyseus/schema";
 import { Room } from "@colyseus/core";
 import { Player } from "../../entities/player";
+import { TokenEntity } from "../../entities/token";
 
 class Attachment extends Schema {
     @type("string") url: string;
@@ -32,6 +33,9 @@ export class RPGRoomState extends Schema {
 
     @type([Message])
     messages = new ArraySchema<Message>();
+
+    @type({ map: TokenEntity })
+    tokens = new MapSchema<TokenEntity>();
 
     @type({ map: Player })
     players = new MapSchema<Player>();

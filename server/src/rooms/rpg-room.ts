@@ -2,8 +2,9 @@ import { Room, Client } from "@colyseus/core";
 import { Message, RPGRoomState } from "./schema/rpg-room-state";
 import { tryParsingDice } from "../lib/dices";
 import { Dispatcher } from "@colyseus/command";
-import { OnPlayerJoin, OnPlayerLeave, OnPlayerMove } from "../events/on-player-join";
+import { OnPlayerJoin, OnPlayerLeave } from "../events/on-player-join";
 import { commands } from "../commands";
+import { OnTokenPositionUpdate } from "../events/on-token-position-update";
 
 export class RpgRoom extends Room<RPGRoomState> {
     public maxClients = 8;
@@ -30,8 +31,8 @@ export class RpgRoom extends Room<RPGRoomState> {
                 const args = message.split(" ");
 
                 const command = {
-                    command: args[0].slice(1).toLowerCase(),
-                    content: args.slice(1).join(" ")
+                    command: args[0].startsWith("/") ? args[0].slice(1).toLowerCase() : args[0],
+                    content: args.slice(1)
                 };
 
                 console.log("Received command:", command)
@@ -47,19 +48,20 @@ export class RpgRoom extends Room<RPGRoomState> {
                 }
             }
         );
+
+        this.onMessage("position", (client, payload) => {
+            this.dispatcher.dispatch(new OnTokenPositionUpdate(), {
+                sessionId: client.sessionId,
+                targetId: payload.targetId,
+                x: payload.x,
+                y: payload.y
+            });
+        })
     }
 
     onJoin(client: Client, options: any) {
         console.log(client.sessionId, "joined!");
-        this.dispatcher.dispatch(new OnPlayerJoin(), { sessionId: client.sessionId });
-
-        this.onMessage<{
-            id: string;
-            x: number;
-            y: number;
-        }>("move", (client, payload) => {
-            this.dispatcher.dispatch(new OnPlayerMove(), { id: payload.id, x: payload.x, y: payload.y });
-        });
+        this.dispatcher.dispatch(new OnPlayerJoin(), { sessionId: client.sessionId, options });
     }
 
     onLeave(client: Client, consented: boolean) {

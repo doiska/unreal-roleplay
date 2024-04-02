@@ -14,7 +14,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   RichTextEditor
 } from "@/pages/rooms/components/input.tsx";
-import { GameMap } from "@/components/game/map.tsx";
 import { Renderer } from "@/components/renderer.tsx";
 
 const formatDate = (date: number) => {
@@ -66,8 +65,7 @@ export function Chat() {
   );
 
   return (
-      <div className="flex flex-col w-full h-full p-4 gap-2">
-        <GameMap />
+      <>
         <ScrollArea className="md:max-h-[300px] min-h-48 border rounded py-2">
           {messages.map(message => {
             return (
@@ -95,6 +93,6 @@ export function Chat() {
         <form className="flex gap-2 justify-stretch">
           <RichTextEditor handleSubmit={handleSendMessage} />
         </form>
-      </div>
+      </>
   );
 }

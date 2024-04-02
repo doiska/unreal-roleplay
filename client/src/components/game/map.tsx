@@ -10,103 +10,65 @@ import {
   Stage,
   Group,
   Transformer,
-  Arc
+  Text,
+  Rect
 } from "react-konva";
+import { Html } from "react-konva-utils";
+
 import useImage from "use-image";
 import Konva from "konva";
 import {
   useColyseusRoom,
-  useColyseusState
+  useColyseusState,
+  useMyState,
 } from "@/colyseus";
 import { MapContextMenu } from "@/components/map-context-menu.tsx";
-
-const map = "https://i.pinimg.com/originals/8f/a9/21/8fa921d8a63955010c4371d247b881ab.png";
+import { useMap } from "@/hooks/use-map.ts";
+import { useZoom } from "@/hooks/use-zoom.ts";
+import { useAssertSize } from "@/hooks/use-assert-size.ts";
+import {
+  InputPrompt,
+  usePrompt
+} from "@/hooks/use-prompt.tsx";
 
 interface Props extends ComponentPropsWithoutRef<typeof Stage> {
-  image?: string;
+  image: string;
 }
 
 const sceneWidth = 1920;
 const sceneHeight = 1080;
 
-export function GameMap({ image = map, ...props }: Props) {
+export function GameMap({ image, ...props }: Props) {
   const [loadedImage] = useImage(image);
-  const [stageSize, setStageSize] = useState({ width: 1000, height: 1000 });
 
-  const players = useColyseusState(state => state.players);
+  const tokens = useColyseusState(state => state.tokens);
 
-  const parentRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<any>(null);
-  const mapRef = useRef<any>(null);
+  const {
+    mapRef,
+    stageRef,
+    parentRef
+  } = useMap();
 
-  useEffect(() => {
-    const resize = () => {
-      if (parentRef.current) {
-        const width = parentRef.current.offsetWidth;
-        const height = parentRef.current.offsetHeight;
-
-        setStageSize({
-          width,
-          height
-
-        });
-      }
-    };
-
-    resize();
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
-  }, []);
-
-  useEffect(() => {
-    const map = mapRef.current;
-
-    if (!map) {
-      return;
-    }
-
-    const handler = (e: any) => {
-      e.evt.preventDefault();
-      const scaleBy = 1.2;
-      const oldScale = map.scaleX();
-      const pointer = map.getStage().getPointerPosition() as any;
-      const mousePointTo = {
-        x: (pointer.x - map.x()) / oldScale,
-        y: (pointer.y - map.y()) / oldScale
-      };
-      const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-      map.scale({ x: newScale, y: newScale });
-
-      const newPos = {
-        x: pointer.x - mousePointTo.x * newScale,
-        y: pointer.y - mousePointTo.y * newScale
-      };
-
-      map.position(newPos);
-      map.batchDraw();
-    };
-
-    map.on("wheel", handler);
-
-    return () => map.off("wheel", handler);
-  }, [stageRef]);
+  const stageSize = useAssertSize({ parentRef });
+  useZoom({ mapRef });
 
   return (
       <MapContextMenu>
         <div ref={parentRef} className="relative border flex-1 rounded min-w-0 min-h-0 overflow-hidden">
-          <Stage draggable={true} ref={stageRef} width={stageSize.width} height={stageSize.height} {...props}>
+          <Stage
+              onClick={console.log} draggable={true} ref={stageRef} width={stageSize.width}
+              height={stageSize.height} {...props}>
             <Layer ref={mapRef}>
               <Image
                   image={loadedImage}
                   fillPatternImage={loadedImage}
                   fillPatternOffset={{ x: -sceneWidth / 2, y: -sceneHeight / 2 }}
               />
-              {[...players.entries()].map(([id, player]) => (
+              {[...tokens.entries()].map(([id, token]) => (
                   <Token
                       id={id}
-                      x={player.position.x}
-                      y={player.position.y}
+                      x={token.position.x}
+                      y={token.position.y}
                       image="https://www.gravatar.com/avatar/"
                   />
               ))}
@@ -117,6 +79,51 @@ export function GameMap({ image = map, ...props }: Props) {
   );
 }
 
+const RectWithText = ({ icon, x, y, width, height, text, ...rest }: {
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  text: string
+}) => {
+  const groupRef = useRef<Konva.Group | null>(null);
+
+  return (
+      <Group
+          {...rest}
+          ref={groupRef}
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+      >
+
+        <Rect
+            fill="#c0c0c0"
+            stroke="black"
+            strokeWidth={0.1}
+            cornerRadius={1}
+            width={width}
+            height={height}
+        />
+        <Text
+            verticalAlign="middle"
+            align="center"
+            fontSize={5}
+            text={text}
+            width={width}
+            height={height}
+        />
+        <Image
+            image={icon}
+            width={6}
+            height={6}
+            x={2}
+            y={height - 8}
+        />
+      </Group>);
+};
+
 const Token = ({ id, x, y, image }: {
   id: string,
   x: number,
@@ -124,11 +131,22 @@ const Token = ({ id, x, y, image }: {
   image: string
 }) => {
   const [loadedImage] = useImage(image);
+  const [heartImage] = useImage(
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjQyNDIiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1oZWFydCI+PHBhdGggZD0iTTE5IDE0YzEuNDktMS40NiAzLTMuMjEgMy01LjVBNS41IDUuNSAwIDAgMCAxNi41IDNjLTEuNzYgMC0zIC41LTQuNSAyLTEuNS0xLjUtMi43NC0yLTQuNS0yQTUuNSA1LjUgMCAwIDAgMiA4LjVjMCAyLjMgMS41IDQuMDUgMyA1LjVsNyA3WiIvPjwvc3ZnPg=="
+  );
   const [isSelected, setIsSelected] = useState(false);
   const shapeRef = useRef<Konva.Group | null>(null);
   const trRef = useRef<Konva.Transformer>(null);
 
+  // TODO: remove it
+
+  //TODO: move to parent
   const room = useColyseusRoom(state => state.room);
+  const colyseusState = useColyseusState(state => state);
+  const myState = useMyState();
+
+
+  const { dialog, open } = usePrompt();
 
   const [position, setPosition] = useState({ x, y });
 
@@ -141,18 +159,27 @@ const Token = ({ id, x, y, image }: {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      room?.send("move", { id, x: position.x, y: position.y });
+      room?.send("position", { targetId: id, x: position.x, y: position.y });
     }, 1000);
     return () => clearTimeout(timer);
   }, [position]);
+
+  //TODO: select multi https://konvajs.org/docs/select_and_transform/Basic_demo.html
+
+  const width = 50;
+  const height = 50;
+  const canViewHealth = myState?.token.id === id || myState?.role === "master";
+  const health = colyseusState.tokens.get(id)?.health || 0;
 
   return (
       <>
         <Group
             ref={shapeRef}
-            x={x} y={y}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
             draggable={true}
-            onClick={() => setIsSelected(!isSelected)}
             onDragEnd={(e) => {
               setPosition({
                 x: e.target.x(),
@@ -160,32 +187,40 @@ const Token = ({ id, x, y, image }: {
               });
             }}
         >
-          <Image image={loadedImage} width={50} height={50} />
-          <Arc
-              x={50}
-              y={25}
-              innerRadius={50}
-              outerRadius={150}
-              angle={60}
-              rotation={-30}
-              fill="grey"
-              opacity={0.5}
+          <Image
+              onClick={() => setIsSelected(!isSelected)}
+              width={width}
+              height={height}
+              image={loadedImage}
           />
+          <Group>
+            {!isSelected && canViewHealth && (
+                <>
+                  <RectWithText
+                      icon={heartImage}
+                      onClick={() => open()} text={`Health ${health}`} x={0} y={-15} width={width} height={10}
+                  />
+                </>
+            )}
+          </Group>
         </Group>
         {isSelected && (
             <Transformer
                 ref={trRef}
                 flipEnabled={false}
-                resizeEnabled={false}
-                boundBoxFunc={(oldBox, newBox) => {
-                  // limit resize
-                  if (Math.abs(newBox.width) < 5 || Math.abs(newBox.height) < 5) {
-                    return oldBox;
-                  }
-                  return newBox;
+                onTransformEnd={e => {
+                  console.log(e);
                 }}
-            />)
-        }
+            />
+        )}
+        <Html>
+          <InputPrompt
+              dialog={dialog}
+              handleSubmit={data => {
+                room?.send("command", `stats set ${id} health ${data}`);
+              }}
+          />
+        </Html>
       </>
   );
 };

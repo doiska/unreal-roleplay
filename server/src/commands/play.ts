@@ -2,8 +2,8 @@ import { Command } from "@colyseus/command";
 import { Message, Song, RPGRoom } from "../rooms/schema/rpg-room-state";
 import { ytdl } from "../lib/ytdlp";
 
-export class PlaySongCommand extends Command<RPGRoom, { sessionId: string; command: string, content: string }> {
-    public async execute({ content: unsafeContent, sessionId} = this.payload) {
+export class PlaySongCommand extends Command<RPGRoom, { sessionId: string; command: string, content: string[] }> {
+    public async execute({ content: [unsafeContent], sessionId} = this.payload) {
         const player = this.state.players.get(sessionId);
 
         const message = new Message({

@@ -1,26 +1,10 @@
 import { Schema, type } from "@colyseus/schema";
+import { TokenEntity } from "./token";
 
 interface IPlayer {
     name: string;
-    role: "user" | "master";
-}
-
-export class Position extends Schema {
-    @type("number")
-    public dimension: number = 0;
-
-    @type("number")
-    public x: number = 0;
-
-    @type("number")
-    public y: number = 0;
-
-    constructor(x: number, y: number, dimension = 0) {
-        super();
-        this.x = x;
-        this.y = y;
-        this.dimension = dimension;
-    }
+    role: "player" | "master";
+    token: TokenEntity;
 }
 
 export class Player extends Schema implements IPlayer {
@@ -28,15 +12,19 @@ export class Player extends Schema implements IPlayer {
     public name: string = "Unnamed Player"
 
     @type("string")
-    public role: "user" | "master" = "user"
+    public role: "player" | "master" = "player";
 
-    @type(Position)
-    public position: Position = new Position(0, 0);
+    @type("string")
+    public map: string = "https://i.pinimg.com/originals/8f/a9/21/8fa921d8a63955010c4371d247b881ab.png";
+
+    @type(TokenEntity)
+    public token: TokenEntity = new TokenEntity();
 
     constructor(player: IPlayer) {
         super();
 
         this.name = player.name;
         this.role = player.role;
+        this.token = player.token;
     }
 }

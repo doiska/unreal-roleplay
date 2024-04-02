@@ -17,11 +17,16 @@ export function Rooms() {
         const formData = new FormData(e.currentTarget);
         const roomId = formData.get("room-id") as string;
 
-        await rooms.joinById(roomId)
+        await rooms.joinById(roomId, {
+            role: "player",
+        })
     }
 
     const handleCreateRoom = async () => {
-        await rooms.joinOrCreate("rpg-room");
+        await rooms.joinOrCreate("rpg-room", {
+            role: "master",
+        });
+
         toast.success("Sala criada com sucesso!");
     }
 
